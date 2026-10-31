@@ -50,13 +50,30 @@ class BioVedaEvaluator:
         mrr = np.mean(reciprocal_ranks)
         hit_rate_at_3 = np.mean(hits_at_3) * 100
         
-        print("-" * 40)
-        print("🏆 FINAL EVALUATION METRICS 🏆")
-        print("-" * 40)
-        print(f"Total Queries Evaluated : {len(self.test_df)}")
-        print(f"Mean Reciprocal Rank (MRR): {mrr:.4f}  <-- (Closer to 1.0 is better)")
-        print(f"Hit Rate @ 3 (HR@3)       : {hit_rate_at_3:.1f}% <-- (% of times the correct plant was in top 3)")
-        print("-" * 40)
+        # 3. Calculate Final Aggregated Metrics
+        mrr = np.mean(reciprocal_ranks)
+        hit_rate_at_3 = np.mean(hits_at_3) * 100
+        
+        # 4. Format the report
+        report_text = f"""----------------------------------------
+🏆 FINAL EVALUATION METRICS 🏆
+----------------------------------------
+Total Queries Evaluated : {len(self.test_df)}
+Mean Reciprocal Rank (MRR): {mrr:.4f}  <-- (Closer to 1.0 is better)
+Hit Rate @ 3 (HR@3)       : {hit_rate_at_3:.1f}% <-- (% of times the correct plant was in top 3)
+----------------------------------------
+"""
+        print(report_text)
+        
+        # 5. Save to a text file
+        report_dir = BASE_DIR / "reports"
+        report_dir.mkdir(parents=True, exist_ok=True)
+        report_path = report_dir / "evaluation_metrics.txt"
+        
+        with open(report_path, "w", encoding="utf-8") as f:
+            f.write(report_text)
+            
+        print(f"✅ Metrics successfully saved to: {report_path}")
 
 if __name__ == "__main__":
     evaluator = BioVedaEvaluator()

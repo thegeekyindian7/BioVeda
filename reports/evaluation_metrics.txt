@@ -1,0 +1,7 @@
+----------------------------------------
+🏆 FINAL EVALUATION METRICS 🏆
+----------------------------------------
+Total Queries Evaluated : 4
+Mean Reciprocal Rank (MRR): 0.8333  <-- (Closer to 1.0 is better)
+Hit Rate @ 3 (HR@3)       : 100.0% <-- (% of times the correct plant was in top 3)
+----------------------------------------
