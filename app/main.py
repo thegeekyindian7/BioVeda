@@ -1,3 +1,10 @@
+import sys
+from pathlib import Path
+
+# Explicitly add the root folder to Python's path so it can find 'src'
+root_path = Path(__file__).resolve().parent.parent
+sys.path.append(str(root_path))
+
 import streamlit as st
 from src.config import INDEX_DIR
 from src.retrieval import BioVedaRetriever
