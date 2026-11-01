@@ -6,9 +6,7 @@ logging.basicConfig(level=logging.INFO, format='%(message)s')
 
 class BioVedaDialogueManager:
     def __init__(self, metadata_path: str):
-        self.df_meta = pd.read_pickle(metadata_path)
-        
-        # Shifted to granular options rather than a lumped question
+        self.df_meta = pd.read_pickle(metadata_path)        
         self.property_questions = {
             "Ushna": {
                 "main_question": "Do you also experience any of the following? (Select all that apply)",
@@ -25,7 +23,6 @@ class BioVedaDialogueManager:
     def generate_clarification_question(self, retrieved_results: List[Dict]) -> Dict:
         ushna_count = 0
         sheeta_count = 0
-        
         # Majority Rule on Top 3
         for res in retrieved_results[:3]:
             plant_data = self.df_meta[self.df_meta['botanical_name'] == res['botanical_name']]
@@ -35,7 +32,6 @@ class BioVedaDialogueManager:
                     ushna_count += 1
                 elif 'Sheeta' in virya:
                     sheeta_count += 1
-
         if ushna_count > sheeta_count and ushna_count >= 2:
             return {
                 "main_question": self.property_questions["Ushna"]["main_question"],
@@ -50,7 +46,6 @@ class BioVedaDialogueManager:
                 "flag": "Sheeta",
                 "reasoning": f"Majority of top candidates ({sheeta_count}/3) are cooling. Verifying safety."
             }
-        
         return {
             "main_question": "Which of the following best describes your condition? (Select all that apply)",
             "options": ["Symptoms have lasted more than a week", "Symptoms are getting worse", "I have taken medication for this already", "None of these"],

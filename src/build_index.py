@@ -17,62 +17,46 @@ class BioVedaIndexer:
         self.model = SentenceTransformer(EMBEDDING_MODEL_NAME)
         
     def _create_hybrid_documents(self) -> pd.DataFrame:
-        """
-        Combines Sanskrit indications with English previews and names 
-        to create a context-rich text document for each plant.
-        """
+        #Combining Sanskrit indications with English names-> creates a context rich doc for each plant
         documents = []
         for _, row in self.df.iterrows():
-            # Safely handle missing lists or text
+            # handle missing lists or text
             eng_name = str(row.get('english_name', ''))
             preview = str(row.get('preview', ''))
-            
             indications = row.get('main_indications', [])
             if isinstance(indications, list):
                 indications_str = ", ".join(indications)
             else:
                 indications_str = str(indications)
-                
             actions = row.get('prabhav', [])
             if isinstance(actions, list):
                 actions_str = ", ".join(actions)
             else:
                 actions_str = str(actions)
-
-            # Construct the hybrid text document
+            # Constructing the hybrid text doc
             doc = f"Name: {eng_name}. Description: {preview}. Indications: {indications_str}. Actions: {actions_str}."
             documents.append(doc)
-            
         self.df['search_document'] = documents
         return self.df
 
     def build_and_save_index(self):
-        """Generates embeddings and builds the FAISS index."""
+        # Creating indexing and FAISS index
         self._create_hybrid_documents()
-        
         documents = self.df['search_document'].tolist()
         logging.info(f"Encoding {len(documents)} plant documents into vectors...")
-        
-        # Generate dense vector embeddings
+        # Generate vector embeddings
         embeddings = self.model.encode(documents, show_progress_bar=True)
-        # Convert to float32 for FAISS compatibility
+        # float32 for FAISS compatibility
         embeddings = np.array(embeddings).astype('float32')
-        
-        # Dimension of the embeddings (usually 768 for PubMedBERT)
+        # Embedding Dimension
         dim = embeddings.shape[1]
-        
-        # Create FAISS Index using L2 (Euclidean) distance
+        # FAISS Index 
         index = faiss.IndexFlatL2(dim)
         index.add(embeddings)
-        
-        # Save the FAISS index
         faiss_path = INDEX_DIR / "bio_veda_plants.index"
         faiss.write_index(index, str(faiss_path))
-        
-        # Save the DataFrame with documents so we can retrieve plant metadata later
         df_path = INDEX_DIR / "plants_metadata.pkl"
-        self.df.to_pickle(str(df_path))
-        
+        self.df.to_pickle(str(df_path))        
         logging.info(f"Successfully saved FAISS index with {index.ntotal} vectors to {faiss_path}")
         logging.info(f"Successfully saved plant metadata to {df_path}")
 
